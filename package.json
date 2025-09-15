@@ -1,0 +1,16 @@
+{
+  "name": "groupproject",
+  "version": "1.0.0",
+  "description": "这是一个使用Vue.js和Node.js构建的Twitter(X)风格的社交媒体应用。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "mysql2": "^3.14.5"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "web3-fix",
+  "version": "1.0.0",
+  "description": "Fix for Web3.js compatibility",
+  "scripts": {
+    "install-web3": "npm install web3@1.10.0 && npm link web3"
+  }
+}

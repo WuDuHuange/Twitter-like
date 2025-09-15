@@ -1,0 +1,30 @@
+{
+  "name": "twitter-clone-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --no-lint",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "serve-with-lint": "vue-cli-service serve"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "core-js": "^3.33.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "vuex": "^4.1.0",
+    "web3": "^4.1.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/eslint-parser": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "@vue/compiler-sfc": "^3.3.4",
+    "eslint": "^8.50.0",
+    "eslint-plugin-vue": "^9.33.0"
+  }
+}
