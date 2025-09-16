@@ -3,12 +3,19 @@
     <!-- 用户信息部分 -->
     <div class="profile-header">
       <div class="profile-avatar">
-        <!-- 显示用户名首字母作为头像占位符 -->
-        <span>{{ userInitial }}</span>
+        <!-- 如果有头像，显示头像，否则显示用户名首字母 -->
+        <img v-if="user.avatar" :src="getAvatarUrl(user.avatar)" alt="用户头像" class="avatar-image">
+        <span v-else>{{ userInitial }}</span>
       </div>
       
       <div class="profile-info">
-        <h1>{{ user.username }}</h1>
+        <div class="profile-top-row">
+          <h1>{{ user.username }}</h1>
+          <!-- 编辑按钮 - 仅当当前用户查看自己的资料时显示 -->
+          <button v-if="isCurrentUser" @click="openEditModal" class="edit-button">
+            编辑资料
+          </button>
+        </div>
         
         <!-- 如果有钱包地址，显示它 -->
         <div v-if="user.wallet_address" class="wallet-address">
@@ -60,12 +67,21 @@
       </div>
     </div>
   </div>
+  
+  <!-- 引入资料编辑模态框组件 -->
+  <profile-edit 
+    :show="showEditModal" 
+    :user="user"
+    @close="closeEditModal"
+    @profile-updated="handleProfileUpdated"
+  />
 </template>
 
 <script>
 import PostList from '@/components/PostList.vue';
 import Pagination from '@/components/Pagination.vue';
 import WalletBalance from '@/components/WalletBalance.vue';
+import ProfileEdit from '@/components/ProfileEdit.vue';
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 
@@ -74,7 +90,8 @@ export default {
   components: {
     PostList,
     Pagination,
-    WalletBalance
+    WalletBalance,
+    ProfileEdit
   },
   data() {
     return {
@@ -82,7 +99,8 @@ export default {
       page: 1,
       limit: 10,
       userLoading: false,
-      userError: null
+      userError: null,
+      showEditModal: false
     };
   },
   computed: {
@@ -116,6 +134,11 @@ export default {
     isWalletUser() {
       // 检查用户是否有钱包地址，并且钱包地址非空
       return this.user && this.user.wallet_address && this.user.wallet_address.length > 0;
+    },
+    // 判断是否是当前登录用户查看自己的资料
+    isCurrentUser() {
+      return this.$store.state.auth.user && 
+             this.$store.state.auth.user.id == this.userId;
     }
   },
   watch: {
@@ -136,6 +159,8 @@ export default {
       try {
         const response = await axios.get(`http://localhost:3000/api/users/${this.userId}`);
         this.user = response.data;
+        
+        // 后端已处理头像URL，此处不需要额外处理
       } catch (error) {
         console.error('加载用户数据失败:', error);
         this.userError = '无法加载用户信息';
@@ -165,6 +190,63 @@ export default {
       
       // 滚动回顶部
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    
+    // 打开编辑模态框
+    openEditModal() {
+      this.showEditModal = true;
+    },
+    
+    // 关闭编辑模态框
+    closeEditModal() {
+      this.showEditModal = false;
+    },
+    
+    // 获取头像完整URL
+    getAvatarUrl(avatarPath) {
+      if (!avatarPath) return null;
+      
+      // 如果已经是完整URL，直接返回
+      if (avatarPath.startsWith('http')) {
+        return avatarPath;
+      }
+      
+      // 如果路径包含uploads，使用标准路径
+      if (avatarPath.includes('uploads/')) {
+        return `http://localhost:3000/${avatarPath}`;
+      }
+      
+      // 否则构建完整URL
+      return `http://localhost:3000${avatarPath}`;
+    },
+    
+    // 处理个人资料更新
+    async handleProfileUpdated(updatedData) {
+      // 更新用户数据
+      if (updatedData.username) {
+        this.user.username = updatedData.username;
+      }
+      
+      if (updatedData.avatar) {
+        this.user.avatar = updatedData.avatar;
+      }
+      
+      // 如果是当前用户，更新全局存储的用户数据
+      if (this.isCurrentUser) {
+        const currentUser = this.$store.state.auth.user;
+        const updatedUser = { ...currentUser };
+        
+        if (updatedData.username) {
+          updatedUser.username = updatedData.username;
+        }
+        
+        if (updatedData.avatar) {
+          updatedUser.avatar = updatedData.avatar;
+        }
+        
+        this.$store.commit('setUser', updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
     }
   }
 };
@@ -172,6 +254,7 @@ export default {
 
 <style scoped>
 .profile-container {
+  width: 600px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -197,6 +280,7 @@ export default {
   color: white;
   font-size: 32px;
   font-weight: bold;
+  overflow: hidden;
   margin-right: 24px;
   flex-shrink: 0;
 }
@@ -205,10 +289,33 @@ export default {
   flex-grow: 1;
 }
 
+.profile-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 .profile-info h1 {
   font-size: 24px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   color: var(--text-color);
+}
+
+.edit-button {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  background-color: rgba(29, 161, 242, 0.1);
 }
 
 .wallet-address {
@@ -276,6 +383,12 @@ export default {
   margin: 0 auto 16px;
 }
 
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (max-width: 480px) {
   .profile-header {
     flex-direction: column;
@@ -285,6 +398,15 @@ export default {
   .profile-avatar {
     margin-right: 0;
     margin-bottom: 16px;
+  }
+  
+  .profile-top-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .edit-button {
+    margin-top: 8px;
   }
 }
 </style>

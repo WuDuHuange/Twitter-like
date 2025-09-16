@@ -2,7 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db.config');
-// 导入Web3，针对v4版本做特殊处理
+// 导入Web3
 const { Web3 } = require('web3');
 // 导入简化的认证处理
 const SimpleAuthHandler = require('../utils/simpleAuth');
@@ -37,10 +37,11 @@ exports.register = async (req, res) => {
     );
     
     // 生成JWT令牌
+    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
     const token = jwt.sign(
       { id: result.insertId },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN) || 86400 }
     );
     
     res.status(201).send({
@@ -87,17 +88,25 @@ exports.login = async (req, res) => {
     }
     
     // 生成JWT令牌
+    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
     const token = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN) || 86400 }
     );
+    
+    // 处理头像路径
+    let avatarUrl = user.avatar;
+    if (avatarUrl) {
+      avatarUrl = `http://localhost:3000${avatarUrl}`;
+    }
     
     res.status(200).send({
       user: {
         id: user.id,
         username: user.username,
-        walletAddress: user.wallet_address
+        walletAddress: user.wallet_address,
+        avatar: avatarUrl
       },
       accessToken: token
     });
@@ -215,18 +224,26 @@ exports.verifyMetamaskSignature = async (req, res) => {
         walletAddress: address
       };
     } else {
+      // 处理头像路径
+      let avatarUrl = users[0].avatar;
+      if (avatarUrl) {
+        avatarUrl = `http://localhost:3000${avatarUrl}`;
+      }
+      
       user = {
         id: users[0].id,
         username: users[0].username,
-        walletAddress: users[0].wallet_address
+        walletAddress: users[0].wallet_address,
+        avatar: avatarUrl
       };
     }
     
     // 生成JWT令牌
+    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
     const accessToken = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN) || 86400 }
     );
     
     res.status(200).send({
