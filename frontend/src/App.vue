@@ -20,16 +20,21 @@
     <main>
       <router-view />
     </main>
+    
+    <!-- 页脚组件 - 显示小组成员信息 -->
+    <app-footer />
   </div>
 </template>
 
 <script>
 import WalletStatus from '@/components/WalletStatus.vue';
+import AppFooter from '@/components/AppFooter.vue';
 
 export default {
   name: 'App',
   components: {
-    WalletStatus
+    WalletStatus,
+    AppFooter
   },
   computed: {
     isLoggedIn() {
@@ -63,6 +68,16 @@ export default {
 
 <style>
 /* 应用全局样式 */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 确保应用至少占满整个视口高度 */
+}
+
+main {
+  flex: 1; /* 主内容区域占用所有可用空间 */
+}
+
 header {
   background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
