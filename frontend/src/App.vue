@@ -54,6 +54,11 @@ export default {
         user.avatar = `http://localhost:3000${user.avatar}`;
       }
       
+      // 确保钱包地址字段名一致 (walletAddress -> wallet_address)
+      if (user.walletAddress && !user.wallet_address) {
+        user.wallet_address = user.walletAddress;
+      }
+      
       this.$store.commit('setToken', token);
       this.$store.commit('setUser', user);
       
@@ -145,7 +150,7 @@ main {
 
 /* 钱包状态组件样式 */
 .wallet-status-container {
-  margin-left: 24px;
+  margin-left: 48px;
 }
 
 @media (max-width: 768px) {
@@ -163,7 +168,7 @@ main {
   }
   
   .wallet-status-container {
-    margin-left: 16px;
+    margin-left: 32px;
   }
 }
 </style>

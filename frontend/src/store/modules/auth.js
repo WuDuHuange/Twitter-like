@@ -139,6 +139,11 @@ const authModule = {
         const token = authResponse.data.accessToken;
         const user = authResponse.data.user;
         
+        // 确保钱包地址字段名一致 (walletAddress -> wallet_address)
+        if (user.walletAddress && !user.wallet_address) {
+          user.wallet_address = user.walletAddress;
+        }
+        
         // 保存到localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
