@@ -39,6 +39,32 @@ export const connectMetamask = async () => {
   }
 };
 
+// 获取ETH余额
+export const getEthBalance = async (address) => {
+  if (!isMetamaskInstalled()) {
+    throw new Error('请安装Metamask钱包');
+  }
+  
+  try {
+    // 使用eth_getBalance方法获取余额（返回16进制字符串）
+    const balanceHex = await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [address, 'latest']
+    });
+    
+    // 将16进制转换为10进制字符串
+    const balanceWei = parseInt(balanceHex, 16).toString();
+    
+    // 将Wei转换为ETH (1 ETH = 10^18 Wei)
+    const balanceEth = parseFloat(balanceWei) / Math.pow(10, 18);
+    
+    return balanceEth.toString();
+  } catch (error) {
+    console.error('获取ETH余额失败:', error);
+    throw new Error('获取ETH余额失败');
+  }
+};
+
 // 请求签名
 export const signMessage = async (message, address) => {
   if (!isMetamaskInstalled()) {
