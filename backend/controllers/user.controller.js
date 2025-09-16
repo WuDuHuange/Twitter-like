@@ -76,13 +76,35 @@ exports.getUserPosts = async (req, res) => {
     
     // 获取分页的用户帖子
     const [posts] = await db.query(`
-      SELECT p.*, u.username 
+      SELECT p.*, u.username, u.avatar
       FROM posts p 
       JOIN users u ON p.user_id = u.id 
       WHERE p.user_id = ? 
       ORDER BY p.created_at DESC 
       LIMIT ? OFFSET ?
     `, [userId, limit, offset]);
+    
+    // 转换图片URL和头像URL为完整路径
+    posts.forEach(post => {
+      if (post.image_url) {
+        // 检查是否已经包含完整URL
+        if (!post.image_url.startsWith('http')) {
+          // 如果文件名已经包含uploads路径，则不重复添加
+          if (post.image_url.includes('uploads/')) {
+            post.image_url = `http://localhost:3000/${post.image_url}`;
+          } else {
+            post.image_url = `http://localhost:3000/uploads/${post.image_url}`;
+          }
+        }
+      }
+      
+      if (post.avatar) {
+        // 检查是否已经包含完整URL
+        if (!post.avatar.startsWith('http')) {
+          post.avatar = `http://localhost:3000${post.avatar}`;
+        }
+      }
+    });
     
     res.status(200).send({
       posts,
