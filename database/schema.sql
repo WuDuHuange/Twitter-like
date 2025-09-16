@@ -33,4 +33,4 @@ CREATE INDEX idx_posts_created_at ON posts(created_at);
 
 -- 添加初始测试用户
 INSERT INTO users (username, password) VALUES
-('test_user', '$2b$10$1JF/QEqfTWl.FrmYgiBjxutBzwDJpw94jRUHPFGZ1ZKMmCSqJlV5S'); -- 密码为'password'
+('test_user', '$2b$10$1JF/QEqfTWl.FrmYgiBjxutBzwDJpw94jRUHPFGZ1ZKMmCSqJlV5S'); -- 密码为'123456'

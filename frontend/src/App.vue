@@ -47,8 +47,13 @@ export default {
   created() {
     // 检查是否有存储的token
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+    let user = JSON.parse(localStorage.getItem('user'));
     if (token && user) {
+      // 确保avatar URL是完整的
+      if (user.avatar && !user.avatar.startsWith('http')) {
+        user.avatar = `http://localhost:3000${user.avatar}`;
+      }
+      
       this.$store.commit('setToken', token);
       this.$store.commit('setUser', user);
       

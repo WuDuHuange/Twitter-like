@@ -18,6 +18,11 @@ exports.getUserById = async (req, res) => {
       return res.status(404).send({ message: '找不到用户' });
     }
     
+    // 处理头像路径
+    if (users[0].avatar) {
+      users[0].avatar = `http://localhost:3000${users[0].avatar}`;
+    }
+    
     res.status(200).send(users[0]);
   } catch (error) {
     console.error('获取用户错误:', error);
@@ -38,6 +43,11 @@ exports.getCurrentUser = async (req, res) => {
     
     if (users.length === 0) {
       return res.status(404).send({ message: '找不到用户' });
+    }
+    
+    // 处理头像路径
+    if (users[0].avatar) {
+      users[0].avatar = `http://localhost:3000${users[0].avatar}`;
     }
     
     res.status(200).send(users[0]);
@@ -147,7 +157,9 @@ exports.updateProfile = async (req, res) => {
       
       updateFields.push('avatar = ?');
       queryParams.push(avatarUrl);
-      updatedData.avatar = avatarUrl;
+      
+      // 保存数据库路径，但返回完整URL
+      updatedData.avatar = `http://localhost:3000${avatarUrl}`;
     }
     
     // 如果没有要更新的字段

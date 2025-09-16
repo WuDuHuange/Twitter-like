@@ -4,7 +4,7 @@
     <div class="profile-header">
       <div class="profile-avatar">
         <!-- 如果有头像，显示头像，否则显示用户名首字母 -->
-        <img v-if="user.avatar" :src="user.avatar" alt="用户头像" class="avatar-image">
+        <img v-if="user.avatar" :src="getAvatarUrl(user.avatar)" alt="用户头像" class="avatar-image">
         <span v-else>{{ userInitial }}</span>
       </div>
       
@@ -159,6 +159,8 @@ export default {
       try {
         const response = await axios.get(`http://localhost:3000/api/users/${this.userId}`);
         this.user = response.data;
+        
+        // 后端已处理头像URL，此处不需要额外处理
       } catch (error) {
         console.error('加载用户数据失败:', error);
         this.userError = '无法加载用户信息';
@@ -198,6 +200,24 @@ export default {
     // 关闭编辑模态框
     closeEditModal() {
       this.showEditModal = false;
+    },
+    
+    // 获取头像完整URL
+    getAvatarUrl(avatarPath) {
+      if (!avatarPath) return null;
+      
+      // 如果已经是完整URL，直接返回
+      if (avatarPath.startsWith('http')) {
+        return avatarPath;
+      }
+      
+      // 如果路径包含uploads，使用标准路径
+      if (avatarPath.includes('uploads/')) {
+        return `http://localhost:3000/${avatarPath}`;
+      }
+      
+      // 否则构建完整URL
+      return `http://localhost:3000${avatarPath}`;
     },
     
     // 处理个人资料更新

@@ -2,7 +2,10 @@
   <div class="post-form-container">
     <form @submit.prevent="submitPost" class="post-form">
       <div class="form-header">
-        <div class="user-avatar">{{ userInitial }}</div>
+        <div class="user-avatar">
+          <img v-if="currentUser && currentUser.avatar" :src="getAvatarUrl(currentUser.avatar)" alt="用户头像" class="avatar-image">
+          <span v-else>{{ userInitial }}</span>
+        </div>
         <textarea 
           v-model="content" 
           placeholder="有什么新鲜事？" 
@@ -88,6 +91,23 @@ export default {
     }
   },
   methods: {
+    getAvatarUrl(avatarPath) {
+      if (!avatarPath) return null;
+      
+      // 如果已经是完整URL，直接返回
+      if (avatarPath.startsWith('http')) {
+        return avatarPath;
+      }
+      
+      // 如果路径包含uploads，使用标准路径
+      if (avatarPath.includes('uploads/')) {
+        return `http://localhost:3000/${avatarPath}`;
+      }
+      
+      // 否则构建完整URL
+      return `http://localhost:3000${avatarPath}`;
+    },
+    
     async submitPost() {
       if (!this.isValid || this.submitting) {
         return;
@@ -241,6 +261,17 @@ export default {
   align-items: center;
   margin-right: 12px;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 textarea {

@@ -36,8 +36,14 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // 可以在这里添加重定向到登录页面的逻辑
-      // window.location.href = '/login';
+      // 导入store并更新状态
+      import('@/store').then(({ default: store }) => {
+        // 清除Vuex store中的认证状态
+        store.commit('clearAuth');
+        
+        // 重定向到登录页面
+        window.location.href = '/login';
+      });
     }
     
     return Promise.reject(error);

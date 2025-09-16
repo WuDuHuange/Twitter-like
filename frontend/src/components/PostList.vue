@@ -6,7 +6,10 @@
       class="post"
     >
       <div class="post-header">
-        <div class="user-avatar">{{ getUserInitial(post.username) }}</div>
+        <div class="user-avatar">
+          <img v-if="post.avatar" :src="getAvatarUrl(post.avatar)" alt="用户头像" class="avatar-image">
+          <span v-else>{{ getUserInitial(post.username) }}</span>
+        </div>
         <div class="post-meta">
           <router-link :to="`/profile/${post.user_id}`" class="username">
             {{ post.username }}
@@ -20,7 +23,7 @@
         
         <!-- 图片显示 -->
         <div v-if="post.image_url" class="post-image">
-          <img :src="post.image_url" alt="发布图片" @click="openImageModal(post.image_url)" />
+          <img :src="getImageUrl(post.image_url)" alt="发布图片" @click="openImageModal(getImageUrl(post.image_url))" />
         </div>
       </div>
       
@@ -63,6 +66,38 @@ export default {
   methods: {
     getUserInitial(username) {
       return username ? username.charAt(0).toUpperCase() : '?';
+    },
+    getAvatarUrl(avatarPath) {
+      if (!avatarPath) return null;
+      
+      // 如果已经是完整URL，直接返回
+      if (avatarPath.startsWith('http')) {
+        return avatarPath;
+      }
+      
+      // 如果路径包含uploads，使用标准路径
+      if (avatarPath.includes('uploads/')) {
+        return `http://localhost:3000/${avatarPath}`;
+      }
+      
+      // 否则构建完整URL
+      return `http://localhost:3000${avatarPath}`;
+    },
+    getImageUrl(imagePath) {
+      if (!imagePath) return null;
+      
+      // 如果已经是完整URL，直接返回
+      if (imagePath.startsWith('http')) {
+        return imagePath;
+      }
+      
+      // 如果路径包含uploads，使用标准路径
+      if (imagePath.includes('uploads/')) {
+        return `http://localhost:3000/${imagePath}`;
+      }
+      
+      // 否则构建完整URL
+      return `http://localhost:3000/uploads/${imagePath}`;
     },
     formatTime(timestamp) {
       if (!timestamp) return '';
@@ -153,6 +188,13 @@ export default {
   align-items: center;
   margin-right: 12px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .post-meta {
