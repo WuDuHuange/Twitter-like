@@ -33,7 +33,7 @@ app.use('/api/wallet', walletRoutes);
 
 // 根路由
 app.get('/', (req, res) => {
-  res.send('欢迎使用Twitter克隆API');
+  res.send('Welcome to Twitter-like API');
 });
 
 // 启动服务器

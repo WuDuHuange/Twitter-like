@@ -5,7 +5,7 @@
         <div class="nav-container">
           <div class="logo">
             <router-link to="/">
-              <h1>推特克隆</h1>
+              <h1>Twitter-like</h1>
             </router-link>
           </div>
           <div class="nav-links">

@@ -14,7 +14,7 @@
         </ul>
       </div>
       <div class="copyright">
-        <p>&copy; {{ currentYear }} Twitter克隆项目</p>
+        <p>&copy; {{ currentYear }} Twitter-like Project</p>
       </div>
     </div>
   </footer>
