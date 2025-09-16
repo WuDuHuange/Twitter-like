@@ -2,7 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db.config');
-// 导入Web3，针对v4版本做特殊处理
+// 导入Web3
 const { Web3 } = require('web3');
 // 导入简化的认证处理
 const SimpleAuthHandler = require('../utils/simpleAuth');
