@@ -2,42 +2,39 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db.config');
-// 导入Web3
+// Web3
 const { Web3 } = require('web3');
-// 导入简化的认证处理
 const SimpleAuthHandler = require('../utils/simpleAuth');
 
-// 用户注册
 exports.register = async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    // 验证输入
     if (!username || !password) {
-      return res.status(400).send({ message: '用户名和密码为必填项' });
+      return res.status(400).send({ message: 'Username and password are required fields' });
     }
-    
-    // 检查用户名是否已存在
+
+    // Check if the username already exists
     const [existingUsers] = await db.query(
       'SELECT * FROM users WHERE username = ?',
       [username]
     );
     
     if (existingUsers.length > 0) {
-      return res.status(400).send({ message: '用户名已存在' });
+      return res.status(400).send({ message: 'Username already exists' });
     }
-    
-    // 哈希密码
+
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // 创建新用户
+
+    // Create new user
     const [result] = await db.query(
       'INSERT INTO users (username, password) VALUES (?, ?)',
       [username, hashedPassword]
     );
-    
-    // 生成JWT令牌
-    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
+
+    // Generate JWT token
+    console.log('JWT expiration time set to:', process.env.JWT_EXPIRES_IN);
     const token = jwt.sign(
       { id: result.insertId },
       process.env.JWT_SECRET,
@@ -45,7 +42,7 @@ exports.register = async (req, res) => {
     );
     
     res.status(201).send({
-      message: '用户注册成功',
+      message: 'User registration successful',
       user: {
         id: result.insertId,
         username
@@ -53,49 +50,49 @@ exports.register = async (req, res) => {
       accessToken: token
     });
   } catch (error) {
-    console.error('注册错误:', error);
-    res.status(500).send({ message: '注册过程中出现服务器错误' });
+    console.error('User registration error:', error);
+    res.status(500).send({ message: 'Server error occurred during registration' });
   }
 };
 
-// 用户登录
+// User login
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
-    // 验证输入
+
+    // Validate input
     if (!username || !password) {
-      return res.status(400).send({ message: '用户名和密码为必填项' });
+      return res.status(400).send({ message: 'Username and password are required fields' });
     }
-    
-    // 查找用户
+
+    // Find user
     const [users] = await db.query(
       'SELECT * FROM users WHERE username = ?',
       [username]
     );
     
     if (users.length === 0) {
-      return res.status(404).send({ message: '用户不存在' });
+      return res.status(404).send({ message: 'User not found' });
     }
     
     const user = users[0];
-    
-    // 验证密码
+
+    // Validate password
     const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (!isValidPassword) {
-      return res.status(401).send({ message: '密码无效' });
+      return res.status(401).send({ message: 'Invalid password' });
     }
     
-    // 生成JWT令牌
-    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
+    // Generate JWT token
+    console.log('JWT expiration time set to:', process.env.JWT_EXPIRES_IN);
     const token = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET,
       { expiresIn: parseInt(process.env.JWT_EXPIRES_IN) || 86400 }
     );
-    
-    // 处理头像路径
+
+    // Handle avatar path
     let avatarUrl = user.avatar;
     if (avatarUrl) {
       avatarUrl = `http://localhost:3000${avatarUrl}`;
@@ -111,98 +108,95 @@ exports.login = async (req, res) => {
       accessToken: token
     });
   } catch (error) {
-    console.error('登录错误:', error);
-    res.status(500).send({ message: '登录过程中出现服务器错误' });
+    console.error('User login error:', error);
+    res.status(500).send({ message: 'Server error occurred during login' });
   }
 };
 
-// 获取Metamask登录消息
+// Get Metamask login message
 exports.getMetamaskMessage = async (req, res) => {
   try {
     const { address } = req.body;
     
     if (!address) {
-      return res.status(400).send({ message: '钱包地址为必填项' });
+      return res.status(400).send({ message: 'Wallet address is required' });
     }
     
-    // 创建一个随机消息让用户签名
+    // Create a random message for the user to sign
     const message = SimpleAuthHandler.generateMessage(address);
-    
-    // 存储消息以便后续验证（在实际应用中，应存储在数据库或缓存中）
-    // 这里简化处理，将消息作为JWT返回
+
+    // Store the message for later verification (in a real application, this should be stored in a database or cache)
+    // Here we simplify by returning the message as a JWT
     const token = jwt.sign(
       { address, message },
       process.env.JWT_SECRET,
-      { expiresIn: '5m' } // 短暂有效期
+      { expiresIn: '5m' } // Short expiration time
     );
     
     res.status(200).send({ message, token });
   } catch (error) {
-    console.error('Metamask消息错误:', error);
-    res.status(500).send({ message: '生成消息过程中出现服务器错误' });
+    console.error('Metamask message error:', error);
+    res.status(500).send({ message: 'Server error occurred while generating message' });
   }
 };
 
-// 验证Metamask签名
+// Verify Metamask signature
 exports.verifyMetamaskSignature = async (req, res) => {
   try {
     const { signature, token } = req.body;
     
     if (!signature || !token) {
-      return res.status(400).send({ message: '签名和令牌为必填项' });
+      return res.status(400).send({ message: 'Signature and token are required fields' });
     }
     
-    // 验证并解码临时令牌
+    // Verify and decode the temporary token
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
-      return res.status(401).send({ message: '令牌无效或已过期' });
+      return res.status(401).send({ message: 'Token invalid or expired' });
     }
     
     const { address, message } = decoded;
-    
-    // 首先尝试使用Web3验证签名
+
+    // First, try to verify the signature using Web3
     try {
-      console.log('开始验证签名...');
-      console.log('地址:', address);
-      console.log('消息:', message);
-      console.log('签名:', signature);
+     
       
       let isSignatureValid = false;
       let recoveredAddress = null;
       
       try {
-        // 尝试使用Web3.js
+        // Try to use Web3.js
         const web3 = new Web3();
         recoveredAddress = web3.eth.accounts.recover(message, signature);
-        console.log('恢复的地址 (web3方式):', recoveredAddress);
+        console.log('Recovered address (Web3 method):', recoveredAddress);
         isSignatureValid = recoveredAddress.toLowerCase() === address.toLowerCase();
       } catch (web3Error) {
-        console.error('Web3签名验证失败，切换到简化验证:', web3Error);
-        
-        // 使用简化的验证逻辑作为备选
+        console.error('Web3 signature verification failed, switching to simplified verification:', web3Error);
+
+        // Use simplified verification logic as a fallback
         isSignatureValid = SimpleAuthHandler.verifySignature(message, signature, address);
         recoveredAddress = isSignatureValid ? address : null;
       }
-      
-      // 如果验证失败
+
+      // If verification fails
       if (!isSignatureValid) {
-        return res.status(401).send({ message: '签名验证失败' });
+        return res.status(401).send({ message: 'Signature verification failed' });
       }
-      
-      // 验证通过，继续处理
-      console.log('签名验证通过');
-      
+
+      // Verification passed, continue processing
+      console.log('Signature verification passed');
+
       if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
-        return res.status(401).send({ message: '签名验证失败' });
+        return res.status(401).send({ message: 'Signature verification failed' });
       }
     } catch (error) {
-      console.error('验证签名出错:', error);
-      return res.status(500).send({ message: '验证签名过程中出现技术错误' });
+      console.error('Signature verification error:', error);
+      return res.status(500).send({ message: 'Server error occurred while verifying signature' });
     }
-    
-    // 检查用户是否存在
+
+    // Check if user exists
     const [users] = await db.query(
       'SELECT * FROM users WHERE wallet_address = ?',
       [address]
@@ -211,7 +205,7 @@ exports.verifyMetamaskSignature = async (req, res) => {
     let user;
     
     if (users.length === 0) {
-      // 创建新用户
+      // Create a new user
       const username = `user_${address.substring(2, 8)}`;
       const [result] = await db.query(
         'INSERT INTO users (username, wallet_address) VALUES (?, ?)',
@@ -224,7 +218,7 @@ exports.verifyMetamaskSignature = async (req, res) => {
         walletAddress: address
       };
     } else {
-      // 处理头像路径
+      // Process avatar URL
       let avatarUrl = users[0].avatar;
       if (avatarUrl) {
         avatarUrl = `http://localhost:3000${avatarUrl}`;
@@ -237,9 +231,9 @@ exports.verifyMetamaskSignature = async (req, res) => {
         avatar: avatarUrl
       };
     }
-    
-    // 生成JWT令牌
-    console.log('JWT过期时间设置:', process.env.JWT_EXPIRES_IN);
+
+    // Generate JWT token
+    console.log('JWT expiration time set to:', process.env.JWT_EXPIRES_IN);
     const accessToken = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET,
@@ -251,20 +245,20 @@ exports.verifyMetamaskSignature = async (req, res) => {
       accessToken
     });
   } catch (error) {
-    console.error('Metamask验证错误:', error);
-    console.error('错误堆栈:', error.stack);
+    console.error('Metamask verification error:', error);
+    console.error('Error stack:', error.stack);
     
-    // 尝试获取更多错误信息
+    // Try to extract more error information
     const errorDetails = {
       message: error.message,
       name: error.name,
       stack: error.stack
     };
     
-    console.log('详细错误信息:', JSON.stringify(errorDetails, null, 2));
+    console.log('Detailed error information:', JSON.stringify(errorDetails, null, 2));
     
     res.status(500).send({ 
-      message: '验证签名过程中出现服务器错误',
+      message: 'Server error occurred during signature verification process',
       error: error.message,
       details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
     });

@@ -1,11 +1,11 @@
-// metamask.js - Web3相关工具函数
+// metamask.js - Web3 related utility functions
 
-// 检查Metamask是否已安装
+// Check if Metamask is installed
 export const isMetamaskInstalled = () => {
   return typeof window.ethereum !== 'undefined';
 };
 
-// 检查Metamask是否已连接
+// Check if Metamask is connected
 export const isMetamaskConnected = async () => {
   if (!isMetamaskInstalled()) {
     return false;
@@ -17,15 +17,15 @@ export const isMetamaskConnected = async () => {
     });
     return accounts.length > 0;
   } catch (error) {
-    console.error('检查Metamask连接状态失败:', error);
+    console.error('Failed to check Metamask connection status:', error);
     return false;
   }
 };
 
-// 请求连接Metamask
+// Request Metamask connection
 export const connectMetamask = async () => {
   if (!isMetamaskInstalled()) {
-    throw new Error('请安装Metamask钱包');
+    throw new Error('Please install Metamask wallet extension');
   }
   
   try {
@@ -34,41 +34,41 @@ export const connectMetamask = async () => {
     });
     return accounts[0];
   } catch (error) {
-    console.error('连接Metamask失败:', error);
-    throw new Error('连接钱包失败，请重试');
+    console.error('Failed to connect to Metamask:', error);
+    throw new Error('Failed to connect wallet, please try again');
   }
 };
 
-// 获取ETH余额
+// Get ETH balance
 export const getEthBalance = async (address) => {
   if (!isMetamaskInstalled()) {
-    throw new Error('请安装Metamask钱包');
+    throw new Error('Please install Metamask wallet extension');
   }
   
   try {
-    // 使用eth_getBalance方法获取余额（返回16进制字符串）
+    // Use eth_getBalance method to get balance (returns hex string)
     const balanceHex = await window.ethereum.request({
       method: 'eth_getBalance',
       params: [address, 'latest']
     });
     
-    // 将16进制转换为10进制字符串
+    // Convert hex to decimal string
     const balanceWei = parseInt(balanceHex, 16).toString();
     
-    // 将Wei转换为ETH (1 ETH = 10^18 Wei)
+    // Convert Wei to ETH (1 ETH = 10^18 Wei)
     const balanceEth = parseFloat(balanceWei) / Math.pow(10, 18);
     
     return balanceEth.toString();
   } catch (error) {
-    console.error('获取ETH余额失败:', error);
-    throw new Error('获取ETH余额失败');
+    console.error('Failed to get ETH balance:', error);
+    throw new Error('Failed to get ETH balance');
   }
 };
 
-// 请求签名
+// Request signature
 export const signMessage = async (message, address) => {
   if (!isMetamaskInstalled()) {
-    throw new Error('请安装Metamask钱包');
+    throw new Error('Please install Metamask wallet extension');
   }
   
   try {
@@ -78,19 +78,19 @@ export const signMessage = async (message, address) => {
     });
     return signature;
   } catch (error) {
-    console.error('签名消息失败:', error);
-    throw new Error('签名失败，请重试');
+    console.error('Failed to sign message:', error);
+    throw new Error('Signature failed, please try again');
   }
 };
 
-// 监听账户变化
+// Listen for account changes
 export const setupAccountsChanged = (callback) => {
   if (isMetamaskInstalled()) {
     window.ethereum.on('accountsChanged', callback);
   }
 };
 
-// 监听链变化
+// Listen for chain changes
 export const setupChainChanged = (callback) => {
   if (isMetamaskInstalled()) {
     window.ethereum.on('chainChanged', callback);

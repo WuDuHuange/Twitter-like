@@ -41,7 +41,7 @@ const authModule = {
   },
   
   actions: {
-    // 普通登录
+    // Standard login
     async login({ commit }, credentials) {
       try {
         commit('clearErrors');
@@ -50,26 +50,26 @@ const authModule = {
         const token = response.data.accessToken;
         const user = response.data.user;
         
-        // 保存到localStorage
+        // Save to localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         
-        // 更新状态
+        // Update state
         commit('setToken', token);
         commit('setUser', user);
         
-        // 设置axios默认标头
+        // Set axios default headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         return response;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '登录失败，请重试';
+        const errorMsg = error.response?.data?.message || 'Login failed, please try again';
         commit('setLoginError', errorMsg);
         throw error;
       }
     },
     
-    // 注册
+    // Register
     async register({ commit }, userData) {
       try {
         commit('clearErrors');
@@ -78,101 +78,101 @@ const authModule = {
         const token = response.data.accessToken;
         const user = response.data.user;
         
-        // 保存到localStorage
+        // Save to localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         
-        // 更新状态
+        // Update state
         commit('setToken', token);
         commit('setUser', user);
         
-        // 设置axios默认标头
+        // Set axios default headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         return response;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '注册失败，请重试';
+        const errorMsg = error.response?.data?.message || 'Registration failed, please try again';
         commit('setRegisterError', errorMsg);
         throw error;
       }
     },
     
-    // Metamask登录
+    // Metamask login
     async loginWithMetamask({ commit }) {
       try {
         commit('clearErrors');
         
-        // 检查Metamask是否安装
+        // Check if Metamask is installed
         if (typeof window.ethereum === 'undefined') {
-          throw new Error('请安装Metamask钱包');
+          throw new Error('Please install Metamask wallet extension');
         }
         
-        console.log('Metamask已检测到，正在请求账户...');
+        console.log('Metamask detected, requesting accounts...');
         
-        // 获取账户
+        // Get accounts
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const address = accounts[0];
-        console.log('获取到钱包地址:', address);
+        console.log('Wallet address obtained:', address);
         
-        // 获取服务器生成的消息
-        console.log('向服务器请求消息...');
+        // Get server-generated message
+        console.log('Requesting message from server...');
         const msgResponse = await axios.post(API_URL + 'metamask/message', { address });
         const { message, token: messageToken } = msgResponse.data;
-        console.log('服务器返回消息:', message);
+        console.log('Server returned message:', message);
         
-        // 请求用户签名
-        console.log('请求用户签名消息...');
+        // Request user signature
+        console.log('Requesting user signature...');
         const signature = await window.ethereum.request({
           method: 'personal_sign',
           params: [message, address]
         });
-        console.log('获取到签名:', signature.substring(0, 10) + '...');
+        console.log('Signature obtained:', signature.substring(0, 10) + '...');
         
-        // 验证签名
-        console.log('向服务器发送签名验证请求...');
+        // Verify signature
+        console.log('Sending signature verification request to server...');
         const authResponse = await axios.post(API_URL + 'metamask/verify', {
           signature,
           token: messageToken
         });
-        console.log('签名验证成功');
+        console.log('Signature verification successful');
         
         const token = authResponse.data.accessToken;
         const user = authResponse.data.user;
         
-        // 确保钱包地址字段名一致 (walletAddress -> wallet_address)
+        // Ensure wallet address field name consistency (walletAddress -> wallet_address)
         if (user.walletAddress && !user.wallet_address) {
           user.wallet_address = user.walletAddress;
         }
         
-        // 保存到localStorage
+        // Save to localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         
-        // 更新状态
+        // Update state
         commit('setToken', token);
         commit('setUser', user);
         
-        // 设置axios默认标头
+        // Set axios default headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         return authResponse;
       } catch (error) {
-        const errorMsg = error.message || '登录失败，请重试';
+        const errorMsg = error.message || 'Login failed, please try again';
         commit('setLoginError', errorMsg);
         throw error;
       }
     },
     
-    // 登出
+    // Logout
     logout({ commit }) {
-      // 清除localStorage
+      // Clear localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // 清除axios标头
+      // Clear axios headers
       delete axios.defaults.headers.common['Authorization'];
       
-      // 更新状态
+      // Update state
       commit('clearAuth');
     }
   }

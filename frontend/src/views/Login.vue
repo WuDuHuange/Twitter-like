@@ -1,7 +1,7 @@
 <template>
   <section class="login-page">
     <div class="login-container">
-      <h1>登录</h1>
+      <h1>Login</h1>
       
       <div v-if="error" class="error-message">
         {{ error }}
@@ -9,43 +9,43 @@
       
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="username">用户名</label>
+          <label for="username">Username</label>
           <input 
             type="text" 
             id="username" 
             v-model="username" 
             required 
-            placeholder="输入用户名"
+            placeholder="Enter username"
           />
         </div>
         
         <div class="form-group">
-          <label for="password">密码</label>
+          <label for="password">Password</label>
           <input 
             type="password" 
             id="password" 
             v-model="password" 
             required 
-            placeholder="输入密码"
+            placeholder="Enter password"
           />
         </div>
         
         <div class="buttons">
-          <button type="submit" class="primary-btn">登录</button>
+          <button type="submit" class="primary-btn">Login</button>
           <button 
             type="button" 
             class="metamask-btn" 
             @click="handleMetamaskLogin"
           >
             <span class="metamask-icon">🦊</span>
-            使用Metamask登录
+            Login with Metamask
           </button>
         </div>
       </form>
       
       <div class="register-link">
-        没有账号? 
-        <router-link to="/register">注册</router-link>
+        Don't have an account? 
+        <router-link to="/register">Register</router-link>
       </div>
     </div>
   </section>
@@ -77,12 +77,12 @@ export default {
         });
         this.$router.push('/');
       } catch (error) {
-        console.error('登录失败:', error);
+        console.error('Login failed:', error);
       }
     },
     async handleMetamaskLogin() {
       if (!isMetamaskInstalled()) {
-        alert('请安装Metamask钱包扩展');
+        alert('Please install Metamask wallet extension');
         return;
       }
       
@@ -90,7 +90,7 @@ export default {
         await this.$store.dispatch('loginWithMetamask');
         this.$router.push('/');
       } catch (error) {
-        console.error('Metamask登录失败:', error);
+        console.error('Metamask login failed:', error);
       }
     }
   }

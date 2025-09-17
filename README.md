@@ -1,82 +1,82 @@
-# Twitter(X) 克隆应用
+# Twitter(X) Clone Application
 
-这是一个使用Vue.js和Node.js构建的Twitter(X)风格的社交媒体应用。
+This is a Twitter(X) style social media application built with Vue.js and Node.js.
 
-## 功能特点
+## Features
 
-- 用户注册和登录（用户名/密码）
-- Metamask钱包登录选项
-- 帖子发布和显示
-- 图片上传功能
-- ETH钱包余额显示
-- 分页浏览
-- 个人资料页面
-- 响应式设计
+- User registration and login (username/password)
+- Metamask wallet login option
+- Post publishing and display
+- Image upload functionality
+- ETH wallet balance display
+- Paginated browsing
+- Profile pages
+- Responsive design
 
-## 技术栈
+## Technology Stack
 
-### 前端
+### Frontend
 - Vue.js 3
 - Vue Router
 - Vuex
 - Axios
-- Web3.js (用于Metamask集成)
+- Web3.js (for Metamask integration)
 
-### 后端
+### Backend
 - Node.js
 - Express.js
 - MySQL
-- JWT认证
-- bcrypt密码加密
+- JWT authentication
+- bcrypt password encryption
 
-## 项目结构
+## Project Structure
 
 ```
 groupProject/
-├── frontend/                # 前端Vue.js应用
-│   ├── public/              # 静态资源
-│   └── src/                 # 源代码
-│       ├── assets/          # 样式和图片
-│       ├── components/      # Vue组件
-│       ├── router/          # 路由配置
-│       ├── store/           # Vuex状态管理
-│       ├── utils/           # 工具函数
-│       ├── views/           # 页面组件
-│       ├── App.vue          # 主应用组件
-│       └── main.js          # 入口文件
-├── backend/                 # 后端Node.js服务
-│   ├── config/              # 配置文件
-│   ├── controllers/         # 控制器
-│   ├── middleware/          # 中间件
-│   ├── models/              # 数据模型
-│   ├── routes/              # 路由
-│   ├── utils/               # 工具函数
-│   └── server.js            # 服务器入口
-└── database/                # 数据库相关文件
-    ├── schema.sql           # 数据库架构
-    └── db.init.js           # 数据库初始化脚本
+├── frontend/                # Frontend Vue.js application
+│   ├── public/              # Static resources
+│   └── src/                 # Source code
+│       ├── assets/          # Styles and images
+│       ├── components/      # Vue components
+│       ├── router/          # Router configuration
+│       ├── store/           # Vuex state management
+│       ├── utils/           # Utility functions
+│       ├── views/           # Page components
+│       ├── App.vue          # Main application component
+│       └── main.js          # Entry file
+├── backend/                 # Backend Node.js service
+│   ├── config/              # Configuration files
+│   ├── controllers/         # Controllers
+│   ├── middleware/          # Middleware
+│   ├── models/              # Data models
+│   ├── routes/              # Routes
+│   ├── utils/               # Utility functions
+│   └── server.js            # Server entry
+└── database/                # Database related files
+    ├── schema.sql           # Database schema
+    └── db.init.js           # Database initialization script
 ```
 
-## 安装和运行
+## Installation and Setup
 
-### 前提条件
+### Prerequisites
 
 - Node.js 14+
 - MySQL 5.7+
-- Web浏览器（建议使用Chrome或Firefox）
-- Metamask浏览器扩展（可选，用于Web3登录）
+- Web browser (Chrome or Firefox recommended)
+- Metamask browser extension (optional, for Web3 login)
 
-### 后端设置
+### Backend Setup
 
-1. 创建MySQL数据库：
+1. Create MySQL database:
 
 ```sql
 CREATE DATABASE twitter_clone;
 ```
 
-2. 配置环境变量：
+2. Configure environment variables:
 
-创建一个`.env`文件在`backend`目录下，内容如下：
+Create a `.env` file in the `backend` directory with the following content:
 
 ```
 PORT=3000
@@ -88,14 +88,14 @@ JWT_SECRET=your_secret_key
 JWT_EXPIRES_IN=86400
 ```
 
-3. 初始化数据库：
+3. Initialize the database:
 
 ```bash
 cd database
 node db.init.js
 ```
 
-4. 安装依赖并运行后端服务：
+4. Install dependencies and run the backend service:
 
 ```bash
 cd backend
@@ -103,52 +103,52 @@ npm install
 npm start
 ```
 
-服务器将在`http://localhost:3000`上运行。
+The server will run on `http://localhost:3000`.
 
-### 前端设置
+### Frontend Setup
 
-1. 安装依赖：
+1. Install dependencies:
 
 ```bash
 cd frontend
 npm install
 ```
 
-2. 运行开发服务器：
+2. Run development server:
 
 ```bash
 npm run serve
 ```
 
-前端应用将在`http://localhost:8080`上运行。
+The frontend application will run on `http://localhost:8080`.
 
-## API端点
+## API Endpoints
 
-### 认证
+### Authentication
 
-- POST `/api/auth/register` - 注册新用户
-- POST `/api/auth/login` - 用户登录
-- POST `/api/auth/metamask/message` - 获取Metamask签名消息
-- POST `/api/auth/metamask/verify` - 验证Metamask签名
+- POST `/api/auth/register` - Register new user
+- POST `/api/auth/login` - User login
+- POST `/api/auth/metamask/message` - Get Metamask signature message
+- POST `/api/auth/metamask/verify` - Verify Metamask signature
 
-### 帖子
+### Posts
 
-- GET `/api/posts` - 获取所有帖子（带分页）
-- GET `/api/posts/:id` - 获取单个帖子
-- POST `/api/posts` - 创建新帖子（需要认证）
-  - 支持multipart/form-data上传图片
-- DELETE `/api/posts/:id` - 删除帖子（需要认证）
+- GET `/api/posts` - Get all posts (with pagination)
+- GET `/api/posts/:id` - Get single post
+- POST `/api/posts` - Create new post (requires authentication)
+  - Supports multipart/form-data for image upload
+- DELETE `/api/posts/:id` - Delete post (requires authentication)
 
-### 钱包
+### Wallet
 
-- GET `/api/wallet/balance/:address` - 获取ETH钱包余额
+- GET `/api/wallet/balance/:address` - Get ETH wallet balance
 
-### 用户
+### Users
 
-- GET `/api/users/:id` - 获取用户信息
-- GET `/api/users/me` - 获取当前用户信息（需要认证）
-- GET `/api/users/:id/posts` - 获取用户的帖子
+- GET `/api/users/:id` - Get user information
+- GET `/api/users/me` - Get current user information (requires authentication)
+- GET `/api/users/:id/posts` - Get user posts
 
-## 许可证
+## License
 
 MIT

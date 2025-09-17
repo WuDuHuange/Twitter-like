@@ -1,4 +1,4 @@
-/* 主要CSS样式 */
+/* Main CSS styles */
 :root {
   --primary-color: #1DA1F2;
   --secondary-color: #14171A;
@@ -90,7 +90,7 @@ input, textarea {
   margin-top: 4px;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
   .hide-mobile {
     display: none;

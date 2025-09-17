@@ -1,59 +1,59 @@
 <template>
   <div class="profile-container">
-    <!-- 用户信息部分 -->
+    <!-- User Information Section -->
     <div class="profile-header">
       <div class="profile-avatar">
-        <!-- 如果有头像，显示头像，否则显示用户名首字母 -->
-        <img v-if="user.avatar" :src="getAvatarUrl(user.avatar)" alt="用户头像" class="avatar-image">
+        <!-- Show avatar if available, otherwise show user's initial -->
+        <img v-if="user.avatar" :src="getAvatarUrl(user.avatar)" alt="User Avatar" class="avatar-image">
         <span v-else>{{ userInitial }}</span>
       </div>
       
       <div class="profile-info">
         <div class="profile-top-row">
           <h1>{{ user.username }}</h1>
-          <!-- 编辑按钮 - 仅当当前用户查看自己的资料时显示 -->
+          <!-- Edit button - only shown when current user views their own profile -->
           <button v-if="isCurrentUser" @click="openEditModal" class="edit-button">
-            编辑资料
+            Edit Profile
           </button>
         </div>
         
-        <!-- 如果有钱包地址，显示它 -->
+        <!-- Display wallet address if available -->
         <div v-if="user.wallet_address" class="wallet-address">
           <span class="wallet-icon">🦊</span>
           {{ shortenedWalletAddress }}
         </div>
         
-        <!-- 加入日期 -->
+        <!-- Join date -->
         <div class="joined-date">
-          加入于 {{ formattedDate }}
+          Joined on {{ formattedDate }}
         </div>
       </div>
     </div>
     
-    <!-- 钱包余额组件 - 仅在用户使用MetaMask登录时显示 -->
+    <!-- Wallet Balance Component - only shown when user has logged in with MetaMask -->
     <wallet-balance
       v-if="user.wallet_address" 
       :wallet-address="user.wallet_address"
       :show-balance="isWalletUser"
     />
     
-    <!-- 用户帖子部分 -->
+    <!-- User Posts Section -->
     <div class="profile-posts">
-      <h2>帖子</h2>
+      <h2>Posts</h2>
       
-      <!-- 帖子加载状态 -->
+      <!-- Posts loading status -->
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <p>加载中...</p>
+        <p>Loading...</p>
       </div>
       
-      <!-- 用户帖子列表 -->
+      <!-- User posts list -->
       <post-list 
         :posts="userPosts" 
         @post-deleted="refreshPosts" 
       />
       
-      <!-- 分页控件 -->
+      <!-- Pagination controls -->
       <pagination 
         v-if="totalPages > 1" 
         :current-page="currentPage" 
@@ -61,14 +61,14 @@
         @page-change="handlePageChange"
       />
       
-      <!-- 无帖子提示 -->
+      <!-- No posts message -->
       <div v-if="!loading && userPosts.length === 0" class="empty-posts">
-        <p>此用户还没有发布任何帖子。</p>
+        <p>This user hasn't published any posts yet.</p>
       </div>
     </div>
   </div>
   
-  <!-- 引入资料编辑模态框组件 -->
+  <!-- Include profile edit modal component -->
   <profile-edit 
     :show="showEditModal" 
     :user="user"
@@ -118,13 +118,13 @@ export default {
     userInitial() {
       return this.user.username ? this.user.username.charAt(0).toUpperCase() : '?';
     },
-    // 格式化日期
+    // Format date
     formattedDate() {
       if (!this.user.created_at) return '';
       const date = new Date(this.user.created_at);
-      return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     },
-    // 缩短钱包地址显示
+    // Shorten wallet address display
     shortenedWalletAddress() {
       if (!this.user.wallet_address) return '';
       const addr = this.user.wallet_address;
@@ -160,10 +160,10 @@ export default {
         const response = await axios.get(`http://localhost:3000/api/users/${this.userId}`);
         this.user = response.data;
         
-        // 后端已处理头像URL，此处不需要额外处理
+        // Avatar URL already processed by backend, no additional processing needed
       } catch (error) {
-        console.error('加载用户数据失败:', error);
-        this.userError = '无法加载用户信息';
+        console.error('Failed to load user data:', error);
+        this.userError = 'Unable to load user information';
       } finally {
         this.userLoading = false;
       }
@@ -176,11 +176,11 @@ export default {
           limit: this.limit
         });
       } catch (error) {
-        console.error('加载用户帖子失败:', error);
+        console.error('Failed to load user posts:', error);
       }
     },
     async refreshPosts() {
-      // 刷新回到第一页
+      // Refresh back to first page
       this.page = 1;
       await this.loadUserPosts();
     },
@@ -188,7 +188,7 @@ export default {
       this.page = newPage;
       await this.loadUserPosts();
       
-      // 滚动回顶部
+      // Scroll back to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     
