@@ -11,7 +11,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -25,15 +24,16 @@ export default {
   },
   computed: {
     ...mapGetters({
-      currentUser: 'auth/user',
+      currentUser: 'currentUser',
     }),
     // 判断钱包是否连接
     walletConnected() {
-      return this.currentUser && this.currentUser.wallet_address;
+      return this.currentUser && (this.currentUser.wallet_address || this.currentUser.walletAddress);
     },
     // 获取钱包地址
     walletAddress() {
-      return this.currentUser ? this.currentUser.wallet_address : null;
+      if (!this.currentUser) return null;
+      return this.currentUser.wallet_address || this.currentUser.walletAddress || null;
     },
     // 缩短钱包地址显示
     shortenedAddress() {
@@ -70,8 +70,15 @@ export default {
       this.error = null;
       
       try {
-        const response = await axios.get(`http://localhost:3000/api/wallet/balance/${this.walletAddress}`);
-        this.balance = response.data.balanceEth;
+        // 使用MetaMask工具类直接获取余额
+        const { getEthBalance, isMetamaskInstalled } = await import('@/utils/metamask');
+        
+        if (!isMetamaskInstalled()) {
+          throw new Error('请安装并登录MetaMask');
+        }
+        
+        // 直接通过MetaMask获取余额
+        this.balance = await getEthBalance(this.walletAddress);
       } catch (error) {
         console.error('获取钱包余额失败:', error);
         this.error = '无法获取余额';
