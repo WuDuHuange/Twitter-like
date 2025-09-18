@@ -56,7 +56,7 @@ const postsModule = {
   },
   
   actions: {
-    // 获取所有帖子（带分页）
+    // get all posts (with pagination)
     async fetchPosts({ commit }, { page = 1, limit = 10 } = {}) {
       try {
         commit('setLoading', true);
@@ -74,7 +74,7 @@ const postsModule = {
         
         return response.data;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '获取帖子失败';
+        const errorMsg = error.response?.data?.message || 'get posts failed';
         commit('setError', errorMsg);
         throw error;
       } finally {
@@ -82,7 +82,7 @@ const postsModule = {
       }
     },
     
-    // 获取用户帖子（带分页）
+    // get posts by user ID (with pagination)
     async fetchUserPosts({ commit }, { userId, page = 1, limit = 10 }) {
       try {
         commit('setLoading', true);
@@ -100,7 +100,7 @@ const postsModule = {
         
         return response.data;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '获取用户帖子失败';
+        const errorMsg = error.response?.data?.message || 'get user posts failed';
         commit('setError', errorMsg);
         throw error;
       } finally {
@@ -108,7 +108,7 @@ const postsModule = {
       }
     },
     
-    // 获取单个帖子
+    // get single post by ID
     async fetchPostById({ commit }, postId) {
       try {
         commit('setLoading', true);
@@ -119,24 +119,24 @@ const postsModule = {
         
         return response.data;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '获取帖子失败';
+        const errorMsg = error.response?.data?.message || 'get post failed';
         commit('setError', errorMsg);
         throw error;
       } finally {
         commit('setLoading', false);
       }
     },
-    
-    // 创建新帖子
+
+    // Create new post
     async createPost({ commit, rootState }, content) {
       try {
         commit('setLoading', true);
         commit('clearError');
         
-        // 确保有授权令牌
+        // Ensure we have an auth token
         const token = rootState.auth.token;
         if (!token) {
-          throw new Error('未登录，无法创建帖子');
+          throw new Error('Not logged in, unable to create post');
         }
         
         const config = {
@@ -150,7 +150,7 @@ const postsModule = {
         
         return response.data;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || error.message || '创建帖子失败';
+        const errorMsg = error.response?.data?.message || error.message || 'Failed to create post';
         commit('setError', errorMsg);
         throw error;
       } finally {
@@ -158,28 +158,28 @@ const postsModule = {
       }
     },
     
-    // 带图片创建新帖子
+    // Create new post with image
     async createPostWithImage({ commit, rootState }, formData) {
       try {
         commit('setLoading', true);
         commit('clearError');
         
-        // 确保有授权令牌
+        // Ensure we have an auth token
         let token = rootState.auth.token;
         if (!token) {
-          // 尝试从localStorage获取token
+          // Try to get token from localStorage
           token = localStorage.getItem('token');
           if (!token) {
-            throw new Error('未登录，无法创建帖子');
+            throw new Error('Not logged in, unable to create post');
           }
         }
         
-        // 确保使用Bearer前缀
+        // Ensure using Bearer prefix
         if (!token.startsWith('Bearer ')) {
           token = `Bearer ${token}`;
         }
         
-        console.log('使用Token:', token);
+        console.log('Using Token:', token);
         
         const config = {
           headers: {
@@ -193,24 +193,24 @@ const postsModule = {
         
         return response.data;
       } catch (error) {
-        const errorMsg = error.response?.data?.message || error.message || '创建帖子失败';
+        const errorMsg = error.response?.data?.message || error.message || 'failed to create post with image';
         commit('setError', errorMsg);
         throw error;
       } finally {
         commit('setLoading', false);
       }
     },
-    
-    // 删除帖子
+
+    // Delete post
     async deletePost({ commit, rootState }, postId) {
       try {
         commit('setLoading', true);
         commit('clearError');
-        
-        // 确保有授权令牌
+
+        // Ensure we have an auth token
         const token = rootState.auth.token;
         if (!token) {
-          throw new Error('未登录，无法删除帖子');
+          throw new Error('Not logged in, unable to delete post');
         }
         
         const config = {
@@ -224,7 +224,7 @@ const postsModule = {
         
         return { success: true };
       } catch (error) {
-        const errorMsg = error.response?.data?.message || '删除帖子失败';
+        const errorMsg = error.response?.data?.message || 'failed to delete post';
         commit('setError', errorMsg);
         throw error;
       } finally {

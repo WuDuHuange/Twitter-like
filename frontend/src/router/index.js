@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '@/store';
 
-// 路由懒加载
+// lazy-loaded components
 const Home = () => import('@/views/Home.vue');
 const Login = () => import('@/views/Login.vue');
 const Register = () => import('@/views/Register.vue');
@@ -45,11 +45,11 @@ const router = createRouter({
   routes
 });
 
-// 路由导航守卫
+// Navigation guards
 router.beforeEach((to, from, next) => {
   const isLoggedIn = store.getters.isLoggedIn;
   
-  // 需要登录的路由
+  // Routes requiring authentication
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isLoggedIn) {
       next({ name: 'Login' });
@@ -57,7 +57,7 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } 
-  // 游客路由（登录后不能访问）
+  // Guest routes (cannot be accessed when logged in)
   else if (to.matched.some(record => record.meta.guest)) {
     if (isLoggedIn) {
       next({ name: 'Home' });

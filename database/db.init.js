@@ -8,29 +8,29 @@ dotenv.config();
 
 async function initializeDatabase() {
   try {
-    // 数据库连接配置
+    // Database connection configuration
     const config = {
       host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '123456',
-      multipleStatements: true // 允许多条SQL语句
+      password: process.env.DB_PASSWORD || '123456',// Please modify according to actual situation
+      multipleStatements: true // Allow multiple SQL statements
     };
     
-    console.log('正在连接到MySQL服务器...');
+    console.log('Connecting to MySQL server...');
     const connection = await mysql.createConnection(config);
     
-    console.log('正在读取SQL脚本...');
+    console.log('Reading SQL script...');
     const sqlScript = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
     
-    console.log('正在执行SQL脚本...');
+    console.log('Executing SQL script...');
     await connection.query(sqlScript);
     
-    console.log('数据库初始化成功！');
+    console.log('Database initialization successful!');
     await connection.end();
   } catch (error) {
-    console.error('数据库初始化失败:', error);
+    console.error('Database initialization failed:', error);
   }
 }
 
-// 执行初始化
+// Execute initialization
 initializeDatabase();

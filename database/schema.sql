@@ -1,11 +1,11 @@
 -- schema.sql
--- 创建数据库（如果不存在）
+-- Create database (if it doesn't exist)
 CREATE DATABASE IF NOT EXISTS twitter_clone DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 使用数据库
+-- Use database
 USE twitter_clone;
 
--- 用户表
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 帖子表
+-- Posts table
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -27,10 +27,10 @@ CREATE TABLE IF NOT EXISTS posts (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 添加索引
+-- Add indexes
 CREATE INDEX idx_posts_user_id ON posts(user_id);
 CREATE INDEX idx_posts_created_at ON posts(created_at);
 
--- 添加初始测试用户
+-- Add initial test user
 INSERT INTO users (username, password) VALUES
-('test_user', '$2b$10$1JF/QEqfTWl.FrmYgiBjxutBzwDJpw94jRUHPFGZ1ZKMmCSqJlV5S'); -- 密码为'123456'
+('test_user', '$2b$10$1JF/QEqfTWl.FrmYgiBjxutBzwDJpw94jRUHPFGZ1ZKMmCSqJlV5S'); -- password is '123456'

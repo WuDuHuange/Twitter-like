@@ -9,10 +9,10 @@
             </router-link>
           </div>
           <div class="nav-links">
-            <router-link to="/" class="nav-link">首页</router-link>
-            <router-link :to="'/profile/' + currentUser.id" class="nav-link">个人资料</router-link>
+            <router-link to="/" class="nav-link">HomePage</router-link>
+            <router-link :to="'/profile/' + currentUser.id" class="nav-link">Profile</router-link>
             <wallet-status v-if="currentUser && currentUser.wallet_address" class="wallet-status-container" />
-            <button @click="logout" class="nav-link logout">退出</button>
+            <button @click="logout" class="nav-link logout">Logout</button>
           </div>
         </div>
       </nav>

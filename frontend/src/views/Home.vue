@@ -1,26 +1,26 @@
 <template>
   <div class="home-container">
     <div class="home-content">
-      <h1 class="visually-hidden">主页</h1>
+      <h1 class="visually-hidden">Home</h1>
       
-      <!-- 创建帖子组件 -->
+      <!-- Create Post Component -->
       <post-form @post-created="refreshPosts" />
       
       <div class="feed-divider"></div>
       
-      <!-- 帖子加载状态 -->
+      <!-- Post Loading Status -->
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <p>加载中...</p>
+        <p>Loading...</p>
       </div>
       
-      <!-- 帖子列表 -->
+      <!-- Post List -->
       <post-list 
         :posts="posts" 
         @post-deleted="refreshPosts"
       />
       
-      <!-- 分页控件 -->
+      <!-- Pagination Controls -->
       <pagination 
         v-if="totalPages > 1" 
         :current-page="currentPage" 
@@ -28,10 +28,10 @@
         @page-change="handlePageChange"
       />
       
-      <!-- 无帖子提示 -->
+      <!-- Empty Feed Message -->
       <div v-if="!loading && posts.length === 0" class="empty-feed">
-        <p>还没有任何帖子。</p>
-        <p>成为第一个发帖的人吧！</p>
+        <p>No posts yet.</p>
+        <p>Be the first to post something!</p>
       </div>
     </div>
   </div>
@@ -66,7 +66,7 @@ export default {
     })
   },
   created() {
-    // 加载帖子
+    // Load posts
     this.loadPosts();
   },
   methods: {
@@ -77,11 +77,11 @@ export default {
           limit: this.limit
         });
       } catch (error) {
-        console.error('加载帖子失败:', error);
+        console.error('Failed to load posts:', error);
       }
     },
     async refreshPosts() {
-      // 刷新回到第一页
+      // Refresh to first page
       this.page = 1;
       await this.loadPosts();
     },
@@ -89,7 +89,7 @@ export default {
       this.page = newPage;
       await this.loadPosts();
       
-      // 滚动回顶部
+      // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }

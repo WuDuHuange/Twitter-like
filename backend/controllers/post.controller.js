@@ -54,7 +54,7 @@ exports.getAllPosts = async (req, res) => {
     });
   } catch (error) {
     console.error('获取帖子错误:', error);
-    res.status(500).send({ message: '获取帖子过程中出现服务器错误' });
+    res.status(500).send({ message: 'There was a server error during the process of obtaining the post' });
   }
 };
 

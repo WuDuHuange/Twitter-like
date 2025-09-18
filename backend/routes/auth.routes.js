@@ -3,11 +3,11 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 
-// 常规登录/注册路由
+// Regular login/register routes
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 
-// Metamask登录路由
+// Metamask login routes
 router.post('/metamask/message', authController.getMetamaskMessage);
 router.post('/metamask/verify', authController.verifyMetamaskSignature);
 

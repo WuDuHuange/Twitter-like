@@ -3,78 +3,78 @@ const db = require('../config/db.config');
 const fs = require('fs');
 const path = require('path');
 
-// 获取用户信息
+// Get user information
 exports.getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
     
-    // 获取用户信息，但不包括密码
+    // Get user information, but exclude password
     const [users] = await db.query(
       'SELECT id, username, wallet_address, created_at, avatar FROM users WHERE id = ?',
       [userId]
     );
     
     if (users.length === 0) {
-      return res.status(404).send({ message: '找不到用户' });
+      return res.status(404).send({ message: 'User not found' });
     }
     
-    // 处理头像路径
+    // Handle avatar path
     if (users[0].avatar) {
       users[0].avatar = `http://localhost:3000${users[0].avatar}`;
     }
     
     res.status(200).send(users[0]);
   } catch (error) {
-    console.error('获取用户错误:', error);
-    res.status(500).send({ message: '获取用户过程中出现服务器错误' });
+    console.error('Error getting user:', error);
+    res.status(500).send({ message: 'Server error while retrieving user' });
   }
 };
 
-// 获取当前用户信息
+// Get current user information
 exports.getCurrentUser = async (req, res) => {
   try {
-    const userId = req.userId; // 从JWT中提取
-    
-    // 获取用户信息，但不包括密码
+    const userId = req.userId; // get from JWT
+
+    // Get user information, but exclude password
     const [users] = await db.query(
       'SELECT id, username, wallet_address, created_at, avatar FROM users WHERE id = ?',
       [userId]
     );
     
     if (users.length === 0) {
-      return res.status(404).send({ message: '找不到用户' });
+      return res.status(404).send({ message: 'User not found' });
     }
-    
-    // 处理头像路径
+
+    // Handle avatar path
     if (users[0].avatar) {
       users[0].avatar = `http://localhost:3000${users[0].avatar}`;
     }
     
     res.status(200).send(users[0]);
   } catch (error) {
-    console.error('获取用户错误:', error);
-    res.status(500).send({ message: '获取用户过程中出现服务器错误' });
+    console.error('Error getting user:', error);
+    res.status(500).send({ message: 'Server error while retrieving user' });
   }
 };
 
-// 获取用户的帖子
+// Get user posts
 exports.getUserPosts = async (req, res) => {
   try {
     const userId = req.params.id;
-    
-    // 分页参数
+
+    // Pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-    
-    // 获取用户帖子总数
+
+    // Get total number of user posts
     const [countResult] = await db.query(
       'SELECT COUNT(*) as total FROM posts WHERE user_id = ?',
       [userId]
     );
     const totalPosts = countResult[0].total;
-    
-    // 获取分页的用户帖子
+
+    // Get paginated user posts
     const [posts] = await db.query(`
       SELECT p.*, u.username, u.avatar
       FROM posts p 
@@ -83,13 +83,13 @@ exports.getUserPosts = async (req, res) => {
       ORDER BY p.created_at DESC 
       LIMIT ? OFFSET ?
     `, [userId, limit, offset]);
-    
-    // 转换图片URL和头像URL为完整路径
+
+    // Convert image URLs and avatar URLs to complete paths
     posts.forEach(post => {
       if (post.image_url) {
-        // 检查是否已经包含完整URL
+        // Check if it already contains the complete URL
         if (!post.image_url.startsWith('http')) {
-          // 如果文件名已经包含uploads路径，则不重复添加
+          // If the filename already contains the uploads path, do not add it again
           if (post.image_url.includes('uploads/')) {
             post.image_url = `http://localhost:3000/${post.image_url}`;
           } else {
@@ -99,7 +99,7 @@ exports.getUserPosts = async (req, res) => {
       }
       
       if (post.avatar) {
-        // 检查是否已经包含完整URL
+        // Check if it already contains the complete URL
         if (!post.avatar.startsWith('http')) {
           post.avatar = `http://localhost:3000${post.avatar}`;
         }
@@ -113,29 +113,29 @@ exports.getUserPosts = async (req, res) => {
       totalPosts
     });
   } catch (error) {
-    console.error('获取用户帖子错误:', error);
-    res.status(500).send({ message: '获取用户帖子过程中出现服务器错误' });
+    console.error('Error getting user posts:', error);
+    res.status(500).send({ message: 'Server error while retrieving user posts' });
   }
 };
 
-// 更新用户个人资料
+// Update user profile
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.params.id;
-    
-    // 验证操作者是否是资料所有者
+
+    // Verify that the operator is the owner of the profile
     if (req.userId != userId) {
-      return res.status(403).send({ message: '您没有权限修改此用户的资料' });
+      return res.status(403).send({ message: 'You do not have permission to modify this user\'s profile' });
     }
-    
-    // 检查用户是否存在
+
+    // Check if the user exists
     const [users] = await db.query(
       'SELECT id, username, wallet_address, avatar FROM users WHERE id = ?',
       [userId]
     );
     
     if (users.length === 0) {
-      return res.status(404).send({ message: '用户不存在' });
+      return res.status(404).send({ message: 'User not found' });
     }
     
     const user = users[0];
@@ -143,33 +143,33 @@ exports.updateProfile = async (req, res) => {
     let queryParams = [];
     let updatedData = {};
     
-    // 处理用户名更新
+    // Handle username update
     if (req.body.username && user.username !== req.body.username) {
-      // 如果是MetaMask用户，不允许更改用户名
+      // If it's a MetaMask user, do not allow username change
       if (user.wallet_address && user.wallet_address.length > 0) {
-        return res.status(403).send({ message: 'MetaMask账户不能修改用户名' });
+        return res.status(403).send({ message: 'MetaMask accounts cannot change their username' });
       }
-      
-      // 验证用户名是否已存在
+
+      // Check if the username already exists
       const [existingUsers] = await db.query(
         'SELECT id FROM users WHERE username = ? AND id != ?',
         [req.body.username, userId]
       );
       
       if (existingUsers.length > 0) {
-        return res.status(400).send({ message: '用户名已被使用' });
+        return res.status(400).send({ message: 'Username is already taken' });
       }
       
       updateFields.push('username = ?');
       queryParams.push(req.body.username);
       updatedData.username = req.body.username;
     }
-    
-    // 处理头像上传
+
+    // Handle avatar upload
     if (req.file) {
       const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-      
-      // 如果用户之前有头像，删除旧文件
+
+      // If the user previously had an avatar, delete the old file
       if (user.avatar) {
         const oldAvatarPath = path.join(__dirname, '..', user.avatar);
         if (fs.existsSync(oldAvatarPath)) {
@@ -179,30 +179,30 @@ exports.updateProfile = async (req, res) => {
       
       updateFields.push('avatar = ?');
       queryParams.push(avatarUrl);
-      
-      // 保存数据库路径，但返回完整URL
+
+      // Save the database path but return the complete URL
       updatedData.avatar = `http://localhost:3000${avatarUrl}`;
     }
-    
-    // 如果没有要更新的字段
+
+    // If there are no fields to update
     if (updateFields.length === 0) {
-      return res.status(400).send({ message: '没有提供任何要更新的信息' });
+      return res.status(400).send({ message: 'No information to be updated provided' });
     }
-    
-    // 更新用户信息
+
+    // Update user information
     queryParams.push(userId);
     await db.query(
       `UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`,
       queryParams
     );
-    
-    // 返回更新后的用户数据
+
+    // Return the updated user data
     res.status(200).send({
       id: userId,
       ...updatedData
     });
   } catch (error) {
-    console.error('更新用户资料错误:', error);
-    res.status(500).send({ message: '更新用户资料过程中出现服务器错误' });
+    console.error('Error updating user profile:', error);
+    res.status(500).send({ message: 'Server error while updating user profile' });
   }
 };

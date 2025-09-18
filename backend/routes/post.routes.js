@@ -5,16 +5,16 @@ const postController = require('../controllers/post.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 const upload = require('../middleware/uploads.middleware');
 
-// 获取所有帖子（带分页）
+// Get all posts (with pagination)
 router.get('/', postController.getAllPosts);
 
-// 获取单个帖子
+// Get single post
 router.get('/:id', postController.getPostById);
 
-// 创建新帖子（需要验证）- 添加单图片上传
+// Create new post (requires auth) - with single image upload
 router.post('/', authMiddleware.verifyToken, upload.single('image'), postController.createPost);
 
-// 删除帖子（需要验证）
+// Delete post (requires auth)
 router.delete('/:id', authMiddleware.verifyToken, postController.deletePost);
 
 module.exports = router;

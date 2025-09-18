@@ -2,10 +2,10 @@
   <div class="not-found">
     <div class="not-found-content">
       <h1>404</h1>
-      <h2>页面未找到</h2>
-      <p>抱歉，您请求的页面不存在。</p>
+      <h2>Page Not Found</h2>
+      <p>Sorry, the page you requested does not exist.</p>
       <router-link to="/" class="home-link">
-        <button>返回首页</button>
+        <button>Return to Home</button>
       </router-link>
     </div>
   </div>

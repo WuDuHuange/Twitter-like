@@ -1,7 +1,7 @@
 <template>
   <section class="register-page">
     <div class="register-container">
-      <h1>注册</h1>
+      <h1>Register</h1>
       
       <div v-if="error" class="error-message">
         {{ error }}
@@ -9,47 +9,47 @@
       
       <form @submit.prevent="handleRegister" class="register-form">
         <div class="form-group">
-          <label for="username">用户名</label>
+          <label for="username">Username</label>
           <input 
             type="text" 
             id="username" 
             v-model="username" 
             required 
-            placeholder="选择用户名"
+            placeholder="Choose a username"
           />
         </div>
         
         <div class="form-group">
-          <label for="password">密码</label>
+          <label for="password">Password</label>
           <input 
             type="password" 
             id="password" 
             v-model="password" 
             required 
-            placeholder="创建密码"
+            placeholder="Create a password"
           />
         </div>
         
         <div class="form-group">
-          <label for="confirmPassword">确认密码</label>
+          <label for="confirmPassword">Confirm Password</label>
           <input 
             type="password" 
             id="confirmPassword" 
             v-model="confirmPassword" 
             required 
-            placeholder="再次输入密码"
+            placeholder="Enter password again"
           />
           <div v-if="passwordMismatch" class="error-message">
-            两次输入的密码不匹配
+            Passwords do not match
           </div>
         </div>
         
-        <button type="submit" class="primary-btn" :disabled="passwordMismatch">注册</button>
+        <button type="submit" class="primary-btn" :disabled="passwordMismatch">Register</button>
       </form>
       
       <div class="login-link">
-        已有账号? 
-        <router-link to="/login">登录</router-link>
+        Already have an account? 
+        <router-link to="/login">Login</router-link>
       </div>
     </div>
   </section>
@@ -88,7 +88,7 @@ export default {
         });
         this.$router.push('/');
       } catch (error) {
-        console.error('注册失败:', error);
+        console.error('Registration failed:', error);
       }
     }
   }
