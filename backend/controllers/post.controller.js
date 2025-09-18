@@ -3,19 +3,19 @@ const db = require('../config/db.config');
 const path = require('path');
 const fs = require('fs');
 
-// 获取所有帖子（带分页）
+// Get all posts (with pagination
 exports.getAllPosts = async (req, res) => {
   try {
-    // 分页参数
+    // Pagination parameter
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
     
-    // 获取帖子总数
+    // Get the total number of posts
     const [countResult] = await db.query('SELECT COUNT(*) as total FROM posts');
     const totalPosts = countResult[0].total;
     
-    // 获取分页的帖子
+    // Get the paginated post
     const [posts] = await db.query(`
       SELECT p.*, u.username, u.avatar
       FROM posts p 
@@ -24,12 +24,12 @@ exports.getAllPosts = async (req, res) => {
       LIMIT ? OFFSET ?
     `, [limit, offset]);
     
-    // 转换图片URL和头像URL为完整路径
+    // Convert the image URL and avatar URL to the full path
     posts.forEach(post => {
       if (post.image_url) {
-        // 检查是否已经包含完整URL
+        // Check whether the complete URL is already included
         if (!post.image_url.startsWith('http')) {
-          // 如果文件名已经包含uploads路径，则不重复添加
+          // If the file name already contains the uploads path, do not add it again
           if (post.image_url.includes('uploads/')) {
             post.image_url = `http://localhost:3000/${post.image_url}`;
           } else {
@@ -39,7 +39,7 @@ exports.getAllPosts = async (req, res) => {
       }
       
       if (post.avatar) {
-        // 检查是否已经包含完整URL
+        // Check whether the complete URL is already included
         if (!post.avatar.startsWith('http')) {
           post.avatar = `http://localhost:3000${post.avatar}`;
         }
@@ -53,17 +53,17 @@ exports.getAllPosts = async (req, res) => {
       totalPosts
     });
   } catch (error) {
-    console.error('获取帖子错误:', error);
+    console.error('Get post error:', error);
     res.status(500).send({ message: 'There was a server error during the process of obtaining the post' });
   }
 };
 
-// 获取单个帖子
+// Get a single post
 exports.getPostById = async (req, res) => {
   try {
     const postId = req.params.id;
     
-    // 获取帖子信息
+    // Get post information
     const [posts] = await db.query(`
       SELECT p.*, u.username 
       FROM posts p 
@@ -72,14 +72,14 @@ exports.getPostById = async (req, res) => {
     `, [postId]);
     
     if (posts.length === 0) {
-      return res.status(404).send({ message: '找不到帖子' });
+      return res.status(404).send({ message: 'Could not find the post' });
     }
     
-    // 转换图片URL为完整路径
+    // Convert the image URL to the full path
     if (posts[0].image_url) {
-      // 检查是否已经包含完整URL
+      // Check whether the complete URL is already included
       if (!posts[0].image_url.startsWith('http')) {
-        // 如果文件名已经包含uploads路径，则不重复添加
+        // If the file name already contains the uploads path, do not add it again
         if (posts[0].image_url.includes('uploads/')) {
           posts[0].image_url = `http://localhost:3000/${posts[0].image_url}`;
         } else {
@@ -90,41 +90,41 @@ exports.getPostById = async (req, res) => {
     
     res.status(200).send(posts[0]);
   } catch (error) {
-    console.error('获取帖子错误:', error);
-    res.status(500).send({ message: '获取帖子过程中出现服务器错误' });
+    console.error('Get post error:', error);
+    res.status(500).send({ message: 'A server error occurred during the process of obtaining the post' });
   }
 };
 
-// 创建新帖子
+// Create a new post
 exports.createPost = async (req, res) => {
   try {
     const { content } = req.body;
-    const userId = req.userId; // 从JWT中提取
+    const userId = req.userId; // Extract from JWT
     let imageUrl = null;
     
-    // 检查是否有文件上传
+    // Check if there are any files uploaded
     if (req.file) {
       imageUrl = req.file.filename;
     }
     
     if (!content && !imageUrl) {
-      return res.status(400).send({ message: '帖子内容不能为空' });
+      return res.status(400).send({ message: 'The content of the post cannot be empty' });
     }
     
-    // 创建帖子
+    // Create a post
     const [result] = await db.query(
       'INSERT INTO posts (user_id, content, image_url) VALUES (?, ?, ?)',
       [userId, content, imageUrl]
     );
     
-    // 获取用户信息
+    // Obtain user information
     const [users] = await db.query('SELECT username FROM users WHERE id = ?', [userId]);
     
-    // 构建完整的图片URL
+    // Build a complete image URL
     const fullImageUrl = imageUrl ? `http://localhost:3000/uploads/${imageUrl}` : null;
     
     res.status(201).send({
-      message: '帖子创建成功',
+      message: 'The post was created successfully.',
       post: {
         id: result.insertId,
         user_id: userId,
@@ -135,33 +135,33 @@ exports.createPost = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('创建帖子错误:', error);
-    res.status(500).send({ message: '创建帖子过程中出现服务器错误' });
+    console.error('Error in creating a post:', error);
+    res.status(500).send({ message: 'A server error occurred during the post creation process' });
   }
 };
 
-// 删除帖子
+// Delete the post
 exports.deletePost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.userId; // 从JWT中提取
+    const userId = req.userId; // Extract from JWT
     
-    // 检查帖子是否存在并且属于当前用户
+    // Check whether the post exists and belongs to the current user
     const [posts] = await db.query(
       'SELECT * FROM posts WHERE id = ? AND user_id = ?',
       [postId, userId]
     );
     
     if (posts.length === 0) {
-      return res.status(403).send({ message: '没有权限删除此帖子或帖子不存在' });
+      return res.status(403).send({ message: 'There is no permission to delete this post or the post does not exist' });
     }
     
-    // 删除帖子
+    // Delete the post
     await db.query('DELETE FROM posts WHERE id = ?', [postId]);
     
-    res.status(200).send({ message: '帖子删除成功' });
+    res.status(200).send({ message: 'The post was successfully deleted.' });
   } catch (error) {
-    console.error('删除帖子错误:', error);
-    res.status(500).send({ message: '删除帖子过程中出现服务器错误' });
+    console.error('Deleted post error:', error);
+    res.status(500).send({ message: 'A server error occurred during the process of deleting the post' });
   }
 };
